@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>유랑위키</title>
 <style>
 :root{
@@ -173,7 +173,7 @@ button{cursor:pointer;font-family:var(--sans)}
 
 /* 블록 타입 팝업 */
 #blk-menu{position:fixed;background:var(--bg-p);border:1px solid var(--bd);border-radius:var(--r);box-shadow:0 4px 20px rgba(0,0,0,.8);z-index:400;min-width:180px;overflow:hidden;display:none}
-#blk-menu.show{display:block}
+/* blk-menu show via inline style */
 .bmi{padding:7px 12px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--bd-s)}
 .bmi:last-child{border-bottom:none}
 .bmi:hover{background:var(--bg-h)}
@@ -273,8 +273,157 @@ button{cursor:pointer;font-family:var(--sans)}
 .md input::placeholder{color:var(--tx3)}
 .mbtns{display:flex;gap:7px;justify-content:flex-end}
 
-@media(max-width:880px){#sb{display:none}.mg{grid-template-columns:repeat(5,1fr)}.pg-layout,.edit-layout{flex-direction:column}.pg-prof,.edit-prof-col{width:100%}}
-@media(max-width:540px){.mg{grid-template-columns:repeat(3,1fr)}.htl{font-size:22px}.ab{padding:14px 15px}}
+/* ════════════════════════════════
+   RESPONSIVE & MOBILE EDIT
+   ════════════════════════════════ */
+@media(max-width:880px){
+  #sb{display:none}
+  .mg{grid-template-columns:repeat(5,1fr)}
+  .pg-layout,.edit-layout{flex-direction:column}
+  .pg-prof,.edit-prof-col{width:100%}
+  .edit-layout{padding:12px 16px}
+}
+
+@media(max-width:600px){
+  .mg{grid-template-columns:repeat(3,1fr)}
+  .htl{font-size:22px}
+  .ab{padding:12px 14px}
+
+  /* 헤더 */
+  #hd{padding:0 12px;gap:10px}
+  #logo{font-size:14px}
+  #sw{max-width:none;flex:1}
+
+  /* 아티클 */
+  .ah{padding:12px 14px 10px}
+  .atl{font-size:18px}
+  .atabs{padding:0 14px}
+  .at{padding:8px 12px;font-size:12px}
+
+  /* ── 편집 툴바 (모바일 전용) ── */
+  .edit-toolbar{
+    padding:0;
+    overflow-x:auto;
+    overflow-y:hidden;
+    flex-wrap:nowrap;
+    gap:0;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    height:48px;
+    border-radius:0;
+  }
+  .edit-toolbar::-webkit-scrollbar{display:none}
+  .etb-label{display:none} /* 레이블 숨김 */
+  .etb-sep{width:1px;margin:8px 3px;height:28px;flex-shrink:0}
+  .etb-btn{
+    padding:8px 11px;
+    font-size:13px;
+    min-width:40px;
+    height:48px;
+    border-radius:0;
+    border:none;
+    flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .etb-btn:active{background:var(--ac-d)}
+
+  /* ── 블록 에디터 ── */
+  .edit-layout{padding:10px 12px 0}
+  .edit-body{padding-left:40px!important}
+
+  /* 블록 컨트롤: 모바일에선 항상 표시 */
+  .blk-ctrl{
+    opacity:1!important;
+    left:-42px;
+    flex-direction:column;
+    gap:2px;
+  }
+  .blk-btn{
+    width:28px;height:28px;
+    font-size:14px;
+    border-radius:4px;
+  }
+
+  /* 블록 입력 */
+  .blk-input{
+    font-size:16px!important; /* iOS 줌 방지 */
+    padding:6px 8px;
+    min-height:40px;
+  }
+  .blk-h1 .blk-input{font-size:18px!important;margin-top:16px}
+  .blk-h2 .blk-input{font-size:16px!important}
+  .blk-h3 .blk-input{font-size:15px!important}
+
+  /* 블록 추가 버튼: 모바일에선 항상 보임 */
+  .blk-add-row{opacity:1!important}
+  .blk-add-btn{
+    padding:5px 14px;
+    font-size:12px;
+    min-height:32px;
+  }
+
+  /* 블록 메뉴: 모바일에선 하단 시트 */
+  #blk-menu{
+    position:fixed!important;
+    left:0!important;right:0!important;
+    bottom:0!important;top:auto!important;
+    width:100%!important;
+    border-radius:14px 14px 0 0;
+    border:none;
+    border-top:1px solid var(--bd);
+    max-height:60vh;
+    overflow-y:auto;
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .bmi{padding:14px 18px;font-size:15px}
+  .bmi-ico{font-size:18px;width:28px}
+  .bmi-key{display:none}
+
+  /* 편집 하단바 */
+  .edit-foot{
+    position:sticky;bottom:0;
+    padding:8px 12px;
+    padding-bottom:max(8px,env(safe-area-inset-bottom));
+    flex-wrap:wrap;gap:6px;
+  }
+  #esm{font-size:16px} /* iOS 줌 방지 */
+  .ef{padding:9px 18px;font-size:14px;min-height:40px}
+
+  /* 프로필 편집 */
+  .prof-key-input{width:72px;font-size:12px}
+  .prof-val-input{font-size:14px} /* iOS 줌 방지 */
+  .prof-photo-placeholder,.prof-photo-preview{width:120px;height:120px}
+
+  /* 각주 팝업 */
+  #fn-popup{
+    position:fixed!important;
+    left:0!important;right:0!important;bottom:0!important;
+    width:100%!important;
+    border-radius:14px 14px 0 0;
+    border:none;
+    border-top:2px solid var(--ac);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  #fn-input{height:90px}
+
+  /* 위키링크 피커 */
+  #inline-link-picker{
+    position:fixed!important;
+    left:0!important;right:0!important;bottom:0!important;
+    width:100%!important;
+    border-radius:14px 14px 0 0;
+    top:auto!important;
+  }
+
+  /* 블록 메뉴 배경 오버레이 */
+  #blk-menu-overlay{
+    display:none;
+    position:fixed;inset:0;
+    background:rgba(0,0,0,.5);
+    z-index:399;
+  }
+  #blk-menu-overlay.show{display:block}
+}
 
 /* ── TEMPLATE MODAL ── */
 .md-lg{width:560px;max-width:95vw;max-height:88vh;overflow-y:auto}
@@ -486,6 +635,7 @@ button{cursor:pointer;font-family:var(--sans)}
     </div>
   </div>
 </div>
+<div id="blk-menu-overlay"></div>
 <div id="blk-menu"></div>
 <div id="fntip"></div>
 <div id="fn-popup">
@@ -651,7 +801,7 @@ try{
 }catch{db=initDB();}
 
 let curPage=null,curTab='read';
-let blkMenuCb=null; // 블록 메뉴 콜백
+let _blkMenuPage=null; // 블록 메뉴 대상 page (중복 선언 방지용 주석)
 
 // ══════════════════════════
 //  READ RENDERER
@@ -780,19 +930,19 @@ function renderBlockEditor(page){
   if(!wrap)return;
   wrap.innerHTML='';
   (page.blocks||[]).forEach((blk,idx)=>{
-    wrap.appendChild(makeAddRow(idx));
+    wrap.appendChild(makeAddRow(idx,page));
     wrap.appendChild(makeBlkEl(blk,idx,page));
   });
-  wrap.appendChild(makeAddRow(page.blocks.length));
+  wrap.appendChild(makeAddRow(page.blocks.length,page));
 }
 
-function makeAddRow(idx){
+function makeAddRow(idx,page){
   const row=document.createElement('div');
   row.className='blk-add-row';
   row.innerHTML=`<div class="blk-add-line"></div><button class="blk-add-btn">+ 블록 추가</button><div class="blk-add-line"></div>`;
   row.querySelector('button').addEventListener('click',function(e){
     e.stopPropagation();
-    showBlkMenu(e,idx);
+    showBlkMenu(e,idx,page);
   });
   return row;
 }
@@ -842,9 +992,14 @@ function makeBlkEl(blk,idx,page){
     ta.rows=1;
     autoResize(ta);
     ta.dataset.blkId=blk.id;
+    // 초기 높이 설정
+    requestAnimationFrame(()=>autoResize(ta));
     ta.addEventListener('focus',function(){
       window._focusedBlk={blk,ta:this,page};
       renderFnChips(this,blk,null);
+    });
+    ta.addEventListener('blur',function(){
+      // blur 시에도 focusedBlk 유지 (툴바 버튼 클릭 시 blur 먼저 발생)
     });
     ta.addEventListener('input',function(){
       blk.content=this.value;
@@ -964,31 +1119,55 @@ function makeTableEditor(blk,page){
 }
 
 // ── 블록 메뉴 ──
-function showBlkMenu(e,insertIdx){
+
+function showBlkMenu(e,insertIdx,page){
+  _blkMenuPage=page;
   const menu=document.getElementById('blk-menu');
+  const overlay=document.getElementById('blk-menu-overlay');
   menu.innerHTML=BLOCK_MENU.map(m=>`
-    <div class="bmi" data-type="${m.type}">
+    <div class="bmi" data-type="${m.type}" data-idx="${insertIdx}">
       <span class="bmi-ico">${m.ico}</span>
       <span class="bmi-lbl">${m.lbl}</span>
       <span class="bmi-key">${m.key}</span>
     </div>`).join('');
-  const r=e.target.getBoundingClientRect();
-  let left=r.left,top=r.bottom+4;
-  if(left+190>window.innerWidth)left=window.innerWidth-194;
-  menu.style.cssText=`display:block;left:${left}px;top:${top}px`;
-  blkMenuCb=(type)=>{
-    const page=db.pages[curPage];if(!page)return;
-    const newBlk={id:uid(),type,
-      content:type==='table'?{rows:[[{text:'제목1',header:true},{text:'제목2',header:true}],[{text:'',header:false},{text:'',header:false}]]}:''
-    };
-    page.blocks.splice(insertIdx,0,newBlk);
-    renderBlockEditor(page);
-    setTimeout(()=>{
-      const el=document.querySelector(`.blk[data-id="${newBlk.id}"] .blk-input`);
-      if(el)el.focus();
-    },10);
+
+  const isMobile=window.innerWidth<=600;
+  if(isMobile){
+    // 하단 시트
+    menu.style.left='0';menu.style.right='0';
+    menu.style.bottom='0';menu.style.top='auto';
+    menu.style.width='100%';
+    if(overlay)overlay.classList.add('show');
+  }else{
+    const r=e.target.getBoundingClientRect();
+    let left=r.left,top=r.bottom+4;
+    if(left+190>window.innerWidth)left=window.innerWidth-194;
+    if(top+320>window.innerHeight)top=r.top-324;
+    menu.style.left=left+'px';menu.style.top=top+'px';
+    menu.style.bottom='auto';menu.style.width='';
+    if(overlay)overlay.classList.remove('show');
+  }
+  menu.style.display='block';
+  e.stopPropagation();
+}
+function closeBlkMenu(){
+  const menu=document.getElementById('blk-menu');
+  const overlay=document.getElementById('blk-menu-overlay');
+  if(menu)menu.style.display='none';
+  if(overlay)overlay.classList.remove('show');
+}
+function insertBlock(type,insertIdx,page){
+  if(!page)return;
+  const newBlk={id:uid(),type,
+    content:type==='table'?{rows:[[{text:'제목1',header:true},{text:'제목2',header:true}],[{text:'',header:false},{text:'',header:false}]]}:''
   };
-  menu.classList.add('show');
+  page.blocks.splice(insertIdx,0,newBlk);
+  renderBlockEditor(page);
+  // 프로필 에디터도 같은 draft 유지
+  setTimeout(()=>{
+    const el=document.querySelector(`.blk[data-id="${newBlk.id}"] .blk-input`);
+    if(el){el.focus();window._focusedBlk={blk:newBlk,ta:el,page};}
+  },30);
 }
 
 // ── 프로필 편집 ──
@@ -1187,28 +1366,23 @@ function renderTab(){
     tc.innerHTML=`
     <div class="edit-wrap">
       <div class="edit-toolbar" id="edit-toolbar">
-        <span class="etb-label">인라인</span>
-        <button class="etb-btn" data-fmt="bold" title="굵게 (Ctrl+B)"><b>B</b></button>
-        <button class="etb-btn" data-fmt="italic" title="기울임 (Ctrl+I)"><i>I</i></button>
+        <button class="etb-btn" data-fmt="bold" title="굵게"><b>B</b></button>
+        <button class="etb-btn" data-fmt="italic" title="기울임"><i>I</i></button>
         <button class="etb-btn" data-fmt="strike" title="취소선"><s>S</s></button>
-        <button class="etb-btn" data-fmt="code" title="인라인 코드">&lt;/&gt;</button>
+        <button class="etb-btn" data-fmt="code" title="코드">&lt;/&gt;</button>
         <div class="etb-sep"></div>
-        <span class="etb-label">링크</span>
-        <button class="etb-btn" data-fmt="wikilink" title="위키 링크 [[문서명]]">🔗 위키</button>
-        <button class="etb-btn" data-fmt="extlink" title="외부 링크">🌐 외부</button>
+        <button class="etb-btn" data-fmt="wikilink" title="위키링크">🔗</button>
+        <button class="etb-btn" data-fmt="extlink" title="외부링크">🌐</button>
+        <button class="etb-btn" data-fmt="footnote" title="각주" style="color:var(--ac)">각주</button>
         <div class="etb-sep"></div>
-        <span class="etb-label">각주</span>
-        <button class="etb-btn" data-fmt="footnote" title="각주 [^내용]" style="color:var(--ac)">각주[^]</button>
-        <div class="etb-sep"></div>
-        <span class="etb-label">블록 변환</span>
-        <button class="etb-btn" data-fmt="to-h1">H1</button>
-        <button class="etb-btn" data-fmt="to-h2">H2</button>
-        <button class="etb-btn" data-fmt="to-h3">H3</button>
-        <button class="etb-btn" data-fmt="to-p">본문</button>
-        <button class="etb-btn" data-fmt="to-quote">인용</button>
-        <button class="etb-btn" data-fmt="to-ul">목록</button>
-        <button class="etb-btn" data-fmt="to-ol">번호</button>
-        <button class="etb-btn" data-fmt="to-code">코드</button>
+        <button class="etb-btn" data-fmt="to-h1" title="제목1">H1</button>
+        <button class="etb-btn" data-fmt="to-h2" title="제목2">H2</button>
+        <button class="etb-btn" data-fmt="to-h3" title="제목3">H3</button>
+        <button class="etb-btn" data-fmt="to-p" title="본문">¶</button>
+        <button class="etb-btn" data-fmt="to-quote" title="인용">❝</button>
+        <button class="etb-btn" data-fmt="to-ul" title="목록">•</button>
+        <button class="etb-btn" data-fmt="to-ol" title="번호목록">1.</button>
+        <button class="etb-btn" data-fmt="to-code" title="코드블록">&lt;&gt;</button>
       </div>
       <div class="edit-layout">
         <div class="edit-body" style="position:relative;padding-left:56px">
@@ -1329,14 +1503,23 @@ document.getElementById('si').addEventListener('keydown',e=>{
 document.getElementById('btn-write').addEventListener('click',()=>showModal());
 initModalEvents();
 initFnPopupEvents();
+// 블록 메뉴 오버레이 클릭 닫기
+document.getElementById('blk-menu-overlay')?.addEventListener('click',closeBlkMenu);
 
 document.addEventListener('click',e=>{
-  // 블록 메뉴
   const menu=document.getElementById('blk-menu');
-  if(menu.classList.contains('show')){
-    const bmi=e.target.closest('.bmi');
-    if(bmi){blkMenuCb&&blkMenuCb(bmi.dataset.type);menu.classList.remove('show');return}
-    if(!e.target.closest('#blk-menu'))menu.classList.remove('show');
+  // 블록 메뉴 아이템 클릭
+  const bmi=e.target.closest('.bmi');
+  if(bmi){
+    const type=bmi.dataset.type;
+    const idx=+bmi.dataset.idx;
+    closeBlkMenu();
+    insertBlock(type,idx,_blkMenuPage);
+    return;
+  }
+  // 블록 메뉴 외부 클릭시 닫기
+  if(menu&&menu.style.display==='block'&&!e.target.closest('#blk-menu')){
+    closeBlkMenu();
   }
   // 탭
   const tab=e.target.closest('[data-tab]');
@@ -1712,6 +1895,7 @@ function setupEditToolbar(page){
 
   // Ctrl+Z / Ctrl+Y 전역 (편집 모드)
   document._editUndoHandler=function(e){
+    if(e.key==='Escape'){closeBlkMenu();return;}
     if(!(e.ctrlKey||e.metaKey))return;
     const k=e.key.toLowerCase();
     if(!e.shiftKey&&k==='z'){e.preventDefault();undoEdit();}
@@ -1724,15 +1908,16 @@ function applyFmt(fmt,page){
   // 블록 타입 변환 (프로필 인풋에는 적용 안 함)
   if(fmt.startsWith('to-')){
     const focused=window._focusedBlk;
-    if(!focused||focused.profRow)return; // 프로필 인풋엔 블록 변환 불가
+    if(!focused||focused.profRow)return;
     const newType=fmt.slice(3);
-    const {blk}=focused;
+    const {blk,page:fpage}=focused;
+    const usePage=fpage||page;
     blk.type=newType;
-    pushUndo(page);
-    renderBlockEditor(page);
+    pushUndo(usePage);
+    renderBlockEditor(usePage);
     setTimeout(()=>{
       const el=document.querySelector(`.blk[data-id="${blk.id}"] .blk-input`);
-      if(el){el.focus();window._focusedBlk={blk,ta:el,page};}
+      if(el){el.focus();window._focusedBlk={blk,ta:el,page:usePage};}
     },10);
     return;
   }
