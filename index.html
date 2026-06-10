@@ -812,13 +812,15 @@ function renderBlocks(blocks){
   FNMAP={};let fnN=0;
   // 각주 수집
   const allText=blocks.map(b=>typeof b.content==='string'?b.content:'').join('\n');
-  allText.replace(/\[\^([^\]\n]+)\]/g,(_,c)=>{fnN++;FNMAP[fnN]=c});
+  parseFnTokens(allText,(_,content)=>{fnN++;FNMAP[fnN]=content;return'';});
   fnN=0; // 리셋 후 재카운트는 il()에서
 
   let FNCNT=0;
   const localMap={};
   function countFn(text){
-    return text.replace(/\[\^([^\]\n]+)\]/g,(_,c)=>{FNCNT++;localMap[FNCNT]=c;return`\x01${FNCNT}\x01`});
+    return parseFnTokens(text,(match,content)=>{
+      FNCNT++;localMap[FNCNT]=content;return`\x01${FNCNT}\x01`;
+    });
   }
 
   const out=[];
@@ -907,7 +909,7 @@ function renderProfRead(prof,mi,fnOffset){
   const rows=(prof.rows||[]).map(r=>{
     const raw=r.val||'';
     if(!raw)return`<tr><th>${esc(r.key)}</th><td style="color:var(--tx3)">—</td></tr>`;
-    const processed=raw.replace(/\[\^([^\]\n]+)\]/g,(_,c2)=>{rowFnN++;rowFnMap[rowFnN]=c2;return`${rowFnN}`});
+    const processed=parseFnTokens(raw,(_match,content)=>{rowFnN++;rowFnMap[rowFnN]=content;return`${rowFnN}`;});
     return`<tr><th>${esc(r.key)}</th><td>${il(processed,rowFnMap)}</td></tr>`;
   }).join('');
 
@@ -920,6 +922,39 @@ function renderProfRead(prof,mi,fnOffset){
     fnMap:rowFnMap,
     fnCount:rowFnN-(fnOffset||0)
   };
+}
+
+
+// 각주 파싱: [^내용] 에서 내부 [[링크]] 를 올바르게 처리
+function parseFnTokens(text, cb){
+  // cb(match, content, start, end) 형태로 콜백
+  let i=0, result='';
+  while(i<text.length){
+    // [^ 시작 감지
+    if(text[i]==='['&&text[i+1]==='^'){
+      let depth=0, j=i+2, content='';
+      // depth-aware 파싱: [[ 는 depth+1, ]] 는 depth-1, ] 는 닫힘(depth==0)
+      while(j<text.length){
+        if(text[j]==='['&&text[j+1]==='['){depth++;content+='[[';j+=2;continue}
+        if(depth>0&&text[j]===']'&&text[j+1]===']'){depth--;content+=']]';j+=2;continue}
+        if(depth===0&&text[j]===']'){
+          // 각주 완성
+          result+=cb('[^'+content+']', content, i, j+1);
+          i=j+1;
+          break;
+        }
+        if(text[j]==='\n'){break} // 줄바꿈 = 각주 무효
+        content+=text[j];j++;
+      }
+      if(j>=text.length||text[j]==='\n'){
+        // 닫히지 않은 각주 → 원문 유지
+        result+='[^';i+=2;
+      }
+    }else{
+      result+=text[i];i++;
+    }
+  }
+  return result;
 }
 
 // ══════════════════════════
@@ -941,7 +976,7 @@ function makeAddRow(idx,page){
   row.className='blk-add-row';
   row.innerHTML=`<div class="blk-add-line"></div><button class="blk-add-btn">+ 블록 추가</button><div class="blk-add-line"></div>`;
   row.querySelector('button').addEventListener('click',function(e){
-    e.stopPropagation();
+    e.preventDefault();
     showBlkMenu(e,idx,page);
   });
   return row;
@@ -1148,7 +1183,6 @@ function showBlkMenu(e,insertIdx,page){
     if(overlay)overlay.classList.remove('show');
   }
   menu.style.display='block';
-  e.stopPropagation();
 }
 function closeBlkMenu(){
   const menu=document.getElementById('blk-menu');
@@ -1508,7 +1542,9 @@ document.getElementById('blk-menu-overlay')?.addEventListener('click',closeBlkMe
 
 document.addEventListener('click',e=>{
   const menu=document.getElementById('blk-menu');
-  // 블록 메뉴 아이템 클릭
+  const menuOpen=menu&&menu.style.display==='block';
+
+  // 블록 메뉴 아이템 클릭 — 가장 먼저 처리
   const bmi=e.target.closest('.bmi');
   if(bmi){
     const type=bmi.dataset.type;
@@ -1517,18 +1553,23 @@ document.addEventListener('click',e=>{
     insertBlock(type,idx,_blkMenuPage);
     return;
   }
-  // 블록 메뉴 외부 클릭시 닫기
-  if(menu&&menu.style.display==='block'&&!e.target.closest('#blk-menu')){
+
+  // 메뉴 열린 상태에서 외부 클릭 → 닫기
+  if(menuOpen&&!e.target.closest('#blk-menu')&&!e.target.closest('.blk-add-btn')){
     closeBlkMenu();
+    return;
   }
+
   // 탭
   const tab=e.target.closest('[data-tab]');
   if(tab){curTab=tab.dataset.tab;renderPage();return}
+
   // 위키 링크
   const pg=e.target.closest('[data-pg]');
   if(pg){openPage(pg.dataset.pg);return}
   const pgNew=e.target.closest('[data-pg-new]');
   if(pgNew){clearSearch();openPage(pgNew.dataset.pgNew);return}
+
   // 검색 외부
   if(!e.target.closest('#sw'))clearSearch();
 });
@@ -2016,7 +2057,9 @@ function showFnPopup(s,e,el,blk,profRow){
 
   // 선택 영역이 기존 각주 패턴 [^...] 인지 확인
   const selText=el.value.slice(s,e);
-  const existingMatch=selText.match(/^\[\^([^\]]+)\]$/);
+  // 선택 텍스트가 각주 패턴인지 확인 (내부 [[링크]] 포함)
+  let existingMatch=null;
+  parseFnTokens(selText,(match,content)=>{if(match===selText)existingMatch=[match,content];return match;});
   const existingContent=existingMatch?existingMatch[1]:'';
 
   _fnPopupCtx={s,e,el,blk,profRow,isEdit:!!existingMatch};
@@ -2103,7 +2146,11 @@ function renderFnChips(el,blk,profRow){
     el.parentNode.insertBefore(chipRow,el.nextSibling);
   }
   const text=el.value||'';
-  const fns=[...text.matchAll(/\[\^([^\]\n]+)\]/g)];
+  // 각주 목록 수집 (내부 [[링크]] 포함)
+  const fns=[];
+  parseFnTokens(text,(match,content,start,end)=>{
+    fns.push({0:match,1:content,index:start});return match;
+  });
   chipRow.innerHTML=fns.map((m,i)=>`
     <span class="fn-edit-chip" data-fn-chip="${i}" data-fn-start="${m.index}" data-fn-end="${m.index+m[0].length}">
       <span class="fn-edit-chip-ico">注</span>[${i+1}] ${esc(m[1].slice(0,20)+(m[1].length>20?'…':''))}
